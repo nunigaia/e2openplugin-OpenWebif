@@ -1,6 +1,6 @@
 //******************************************************************************
 //* openwebif.js: openwebif base module
-//* Version 1.2.3
+//* Version 1.2.4
 //******************************************************************************
 //* Copyright (C) 2011-2017 E2OpenPlugins
 //*
@@ -18,6 +18,7 @@
 //* V 1.2.1 - fix multiepg
 //* V 1.2.2 - improve epgsearch
 //* V 1.2.3 - fix add at from multiepg
+//* V 1.2.4 - fix screenshot refresh
 //*
 //* Authors: skaman <sandro # skanetwork.com>
 //* 		 meo
@@ -815,10 +816,11 @@ function grabScreenshot(mode) {
 	} else {
 		mode = screenshotMode;
 	}
+	timestamp = new Date().getTime();
 	if (GetLSValue('ssr_hd',false)){
-		$('#screenshotimage').attr("src",'/grab?format=jpg&mode=' + mode);
+		$('#screenshotimage').attr("src",'/grab?format=jpg&mode=' + mode + '#' + timestamp);
 	} else {
-		$('#screenshotimage').attr("src",'/grab?format=jpg&r=720&mode=' + mode);
+		$('#screenshotimage').attr("src",'/grab?format=jpg&r=720&mode=' + mode + '#' + timestamp);
 	}
 	$('#screenshotimage').attr("width",720);
 }
