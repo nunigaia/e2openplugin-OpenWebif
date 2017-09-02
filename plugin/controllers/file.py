@@ -62,16 +62,16 @@ class FileController(resource.Resource):
 				m = re.match('.+\:(\d+)$', ourhost)
 				if m is not None:
 					port = m.group(1)
-					
+
 				response = "#EXTM3U\n#EXTVLCOPT--http-reconnect=true\n#EXTINF:-1,%s\n%s://%s:%s/file?action=download&file=%s" % (name, proto, request.getRequestHostname(), port, quote(filename))
-				request.setHeader("Content-Disposition:", 'attachment;filename="%s.m3u"' % name)
-				request.setHeader("Content-Type:", "audio/mpegurl")
+				request.setHeader("Content-Disposition", 'attachment;filename="%s.m3u"' % name)
+				request.setHeader("Content-Type", "application/x-mpegurl")
 				return response
 			elif action == "delete":
 				request.setResponseCode(http.OK)
 				return "TODO: DELETE FILE: %s" % (filename)
 			elif action == "download":
-				request.setHeader("Content-Disposition:", "attachment;filename=\"%s\"" % (filename.split('/')[-1]))
+				request.setHeader("Content-Disposition", "attachment;filename=\"%s\"" % (filename.split('/')[-1]))
 				rfile = static.File(filename, defaultType = "application/octet-stream")
 				return rfile.render(request)
 			else: 
