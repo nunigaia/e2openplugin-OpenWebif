@@ -19,6 +19,8 @@ from twisted.web import static, resource, http
 
 from Components.config import config
 from Tools.Directories import fileExists
+from utilities import lenient_force_utf_8, sanitise_filename_slashes
+
 
 def new_getRequestHostname(self):
 	host = self.getHeader(b'host')
@@ -38,8 +40,8 @@ class FileController(resource.Resource):
 			action = request.args["action"][0]
 
 		if "file" in request.args:
-			filename = request.args["file"][0].decode('utf-8', 'ignore').encode('utf-8')
-			filename = re.sub("^/+", "/", os.path.realpath(filename))
+			filename = lenient_force_utf_8(request.args["file"][0])
+			filename = sanitise_filename_slashes(os.path.realpath(filename))
 
 			if not os.path.exists(filename):
 				return "File '%s' not found" % (filename)
@@ -76,12 +78,17 @@ class FileController(resource.Resource):
 		if "dir" in request.args:
 			path = request.args["dir"][0]
 			pattern = '*'
-			data = []
+			nofiles = False
 			if "pattern" in request.args:
 				pattern = request.args["pattern"][0]
+			if "nofiles" in request.args:
+				nofiles = True
 			directories = []
 			files = []
+			request.setHeader("content-type", "application/json; charset=utf-8")
 			if fileExists(path):
+				if path == '/':
+					path=''
 				try:
 					files = glob.glob(path+'/'+pattern)
 				except:
@@ -92,8 +99,8 @@ class FileController(resource.Resource):
 					if os.path.isdir(x):
 						directories.append(x + '/')
 						files.remove(x)
-				data.append({"result": True,"dirs": directories,"files": files})
+				if nofiles:
+					files = []
+				return json.dumps({"Result": True,"dirs": directories,"files": files}, indent=2)
 			else:
-				data.append({"result": False,"message": "path %s not exits" % (path)})
-			request.setHeader("content-type", "application/json; charset=utf-8")
-			return json.dumps(data, indent=2)
+				return json.dumps({"Result": False,"message": "path %s not exits" % (path)}, indent=2)
