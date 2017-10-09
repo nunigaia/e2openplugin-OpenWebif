@@ -45,6 +45,8 @@ OPENWEBIFVER = "OWIF 1.2.7"
 
 STATICBOXINFO = None
 
+PICONPATH = None
+
 def getOpenWebifVer():
 	return OPENWEBIFVER
 
@@ -188,6 +190,38 @@ def getViewsPath(file = ""):
 	return getBasePath() + "/controllers/views/" + file
 
 def getPiconPath():
+
+	global PICONPATH
+
+	if PICONPATH is not None:
+		return PICONPATH
+
+	# Alternative locations need to come first, as the default location always exists and needs to be the last resort
+	# Sort alternative locations in order of likelyness that they are non-rotational media:
+	# CF/MMC are always memory cards
+	# USB can be memory stick or magnetic hdd or SSD, but stick is most likely
+	# HDD can be magnetic hdd, SSD or even memory stick (if no hdd present) or a NAS
+	pathlist = [
+		"/media/cf/",
+		"/media/mmc/",
+		"/media/usb/",
+		"/media/hdd/",
+		"/usr/share/enigma2/",
+		"/"
+		]
+
+	for p in pathlist:
+		if pathExists(p+ "owipicon/"):
+			PICONPATH = p + "owipicon/"
+			return PICONPATH
+		elif pathExists(p+ "picon/"):
+			PICONPATH = p + "picon/"
+			return PICONPATH
+
+	return None
+
+
+def _getPiconPath():
 	if pathExists("/media/usb/picon/"):
 		return "/media/usb/picon/"
 	elif pathExists("/media/cf/picon/"):
