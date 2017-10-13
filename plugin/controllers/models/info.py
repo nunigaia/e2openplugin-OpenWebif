@@ -220,7 +220,6 @@ def getPiconPath():
 
 	return None
 
-
 def _getPiconPath():
 	if pathExists("/media/usb/picon/"):
 		return "/media/usb/picon/"
