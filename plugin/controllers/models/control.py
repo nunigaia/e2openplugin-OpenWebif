@@ -14,6 +14,17 @@ from urllib import unquote
 from services import getProtection
 from Screens.InfoBar import InfoBar, MoviePlayer
 import NavigationInstance
+import os
+
+ENABLE_QPIP_PROCPATH = "/proc/stb/video/decodermode"
+def checkIsQPiP():
+	if os.access(ENABLE_QPIP_PROCPATH, os.F_OK):
+		fd = open(ENABLE_QPIP_PROCPATH,"r")
+		data = fd.read()
+		fd.close()
+
+		return data.strip() == "mosaic"
+	return False
 
 def getPlayingref(ref):
 	playingref = None
@@ -73,6 +84,12 @@ def zapInServiceList(service):
 	servicelist.zap()
 
 def zapService(session, id, title = "", stream=False):
+	if checkIsQPiP():
+		return {
+			"result": False,
+			"message": "Can not zap service in quad PiP mode."
+		}
+
 	# Must NOT unquote id here, breaks zap to streams
 	service = eServiceReference(id)
 
@@ -163,7 +180,7 @@ def setPowerState(session, state):
 	state = int(state)
 
 	if state == 0: # Toggle StandBy
-		if inStandby == None:
+		if inStandby is None:
 			session.open(Standby)
 		else:
 			inStandby.Power()
@@ -174,10 +191,10 @@ def setPowerState(session, state):
 	elif state == 3: # Restart Enigma
 		session.open(TryQuitMainloop, state)
 	elif state == 4: # Wakeup
-		if inStandby != None:
+		if inStandby is not None:
 			inStandby.Power()
 	elif state == 5: # Standby
-		if inStandby == None:
+		if inStandby is None:
 			session.open(Standby)
 
 	elif state == 6:
@@ -185,12 +202,12 @@ def setPowerState(session, state):
 
 	return {
 		"result": True,
-		"instandby": inStandby != None
+		"instandby": inStandby is not None
 	}
 
 def getStandbyState(session):
 	from Screens.Standby import inStandby
 	return {
 		"result": True,
-		"instandby": inStandby != None
+		"instandby": inStandby is not None
 	}

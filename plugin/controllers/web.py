@@ -22,7 +22,7 @@ from models.locations import getLocations, getCurrentLocation, addLocation, remo
 from models.timers import getTimers, addTimer, addTimerByEventId, editTimer, removeTimer, toggleTimerStatus, cleanupTimer, writeTimerList, recordNow, tvbrowser, getSleepTimer, setSleepTimer, getPowerTimer, setPowerTimer, getVPSChannels
 from models.message import sendMessage, getMessageAnswer
 from models.movies import getMovieList, removeMovie, getMovieTags, moveMovie, renameMovie, getAllMovies
-from models.config import getSettings, addCollapsedMenu, removeCollapsedMenu, setZapStream, saveConfig, getZapStream, setShowChPicon
+from models.config import getSettings, addCollapsedMenu, removeCollapsedMenu, setZapStream, saveConfig, getZapStream, setShowChPicon, getConfigs, getConfigsSections
 from models.stream import getStream, getTS, getStreamSubservices, GetSession
 from models.servicelist import reloadServicesLists
 from models.mediaplayer import mediaPlayerAdd, mediaPlayerRemove, mediaPlayerPlay, mediaPlayerCommand, mediaPlayerCurrent, mediaPlayerList, mediaPlayerLoad, mediaPlayerSave, mediaPlayerFindFile
@@ -694,7 +694,7 @@ class WebController(BaseController):
 		return getCurrentTime()
 
 	def P_deviceinfo(self, request):
-		return getInfo(need_fullinfo=True)
+		return getInfo(session=self.session, need_fullinfo=True)
 
 	def P_getipv6(self, request):
 		request.setHeader("content-type", "text/html")
@@ -1227,5 +1227,10 @@ class WebController(BaseController):
 				pass
 		return {}
 	
-
+	def P_config(self, request):
+		if "section" in request.args.keys():
+			return getConfigs(request.args["section"][0])
+		else:
+			return getConfigsSections()
+		return {}
 
